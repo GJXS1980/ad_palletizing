@@ -80,28 +80,36 @@ class AN_Vision():
         self.an_vision_req_msg["action"] = "SL"
         self.an_vision_req_msg["target_pose"] = [0.0, 0.0, 0.0]
         self.an_vision_req_json = json.dumps(self.an_vision_req_msg)
+
         self.ar_pose_array = np.zeros((9, 7))
-        self.push_state = 0
+        self.push_state = 0 
+
+        #   mqtt连接
         self.AN_Vision_Mqtt = Vision_Mqtt()
         self.AN_Vision_Mqtt.mqtt_host = self.host_ip
         self.AN_Vision_Mqtt.mqtt_port = self.host_port
         self.AN_Vision_Mqtt.start_mqtt()
-        rospy.Subscriber('ar_pose_marker', AlvarMarkers, self.get_ar_pose)
 
-        rospy.Subscriber("get_push_pose", Int32, self.get_push_state)
-        self.an_target_pose = rospy.Publisher('/target_pose', Float32MultiArray, queue_size=5)
-        self.push_target_pose = rospy.Publisher('/push_target_pose', Float32MultiArray, queue_size=5)
-        self.an_control_pos = rospy.Subscriber("/Pall_CURR_POS", Float32MultiArray, self.get_an_pose)
+        rospy.Subscriber('ar_pose_marker', AlvarMarkers, self.get_ar_pose)  #   获取AR码位姿
 
+        rospy.Subscriber("get_push_pose", Int32, self.get_push_state)   #   获取放置状态
+
+        self.an_target_pose = rospy.Publisher('/target_pose', Float32MultiArray, queue_size=5)  # 发送目标位姿
+        self.push_target_pose = rospy.Publisher('/push_target_pose', Float32MultiArray, queue_size=5)   #   发送放置目标位姿
+        self.an_control_pos = rospy.Subscriber("/Pall_CURR_POS", Float32MultiArray, self.get_an_pose)   #   获取当前岸吊位姿
+
+    # 岸吊放置状态
     def get_push_state(self, data):
         if data.data == 1:
             self.push_state = 1
 
+    # 岸吊当前位姿
     def get_an_pose(self, data):
         self.an_current_x = data.data[0]
         self.an_current_y = data.data[1]
         self.an_current_z = data.data[2]
 
+    # AR码位姿,返回位姿（xyz,wxyz）的四舍五入值
     def get_ar_pose(self, msg):
         self.ar_pose_array.fill(0)
         for i in range(len(msg.markers)):
@@ -115,7 +123,7 @@ class AN_Vision():
             self.ar_pose_array[msg.markers[i].id][6] = msg.markers[i].pose.pose.orientation.z
 
         if self.AN_Vision_Mqtt.AN_Vision_ID == 1 and self.ar_pose_array[0][2] != 0.0:
-
+            #   识别船运动的最大和最小的幅度（z方向）
             if self.dete_time < 10:
                 self.min_high = min(self.ar_pose_array[0][2], self.min_high)
                 self.max_high = max(self.ar_pose_array[0][2], self.max_high)
@@ -123,17 +131,18 @@ class AN_Vision():
                 time.sleep(0.2)
 
             if self.dete_time >= 10:
+                #    取最大和最小幅度平均值加上在z方向的补偿
                 target_high = (self.min_high + self.max_high) / 2 + self.z_dis
+                #   求解公式：target_x = current_x + ar_pose_x + dis_x,etc.
                 target_pose =[self.an_current_x+self.ar_pose_array[0][1]+self.x_dis, self.an_current_y+self.ar_pose_array[0][0]+self.y_dis, self.an_current_z+target_high]
 
-                
-                
                 self.an_vision_req_msg["action"] = self.AN_Vision_Mqtt.AN_Vision_Type
                 self.an_vision_req_msg["target_pose"] = target_pose#[self.ar_pose_array[0][0], self.ar_pose_array[0][1], self.ar_pose_array[0][2]]
                 self.an_vision_req_json = json.dumps(self.an_vision_req_msg)
                 self.AN_Vision_Mqtt.on_publish(self.an_vision_req_json, "/HG_DEV/Vision_REQ", 2)
                 # data = [self.ar_pose_array[0][0], self.ar_pose_array[0][1], self.ar_pose_array[0][2]]
                 target_pose_data = Float32MultiArray(data=target_pose)
+                #   发送目标位姿（连续发布4次）
                 for i in range(4):
                     self.an_target_pose.publish(target_pose_data)
 

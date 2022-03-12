@@ -26,7 +26,7 @@ class AN_Mqtt():
     def on_subscribe(self):
         self.mqttClient.subscribe("/HG_DEV/ZK_ALL", 2)
         self.mqttClient.on_message = self.on_message_come  # 消息到来处理函数
-
+    #   启动mqtt连接
     def start_mqtt(self):
         self.on_mqtt_connect()
         self.on_subscribe()
@@ -82,10 +82,10 @@ class AN_Mission_Test:
         self.an_target_pose = [0.0, 0.0, 0.0]
         # 放置点
         self.push_target_pose = [0.0, 0.0, 0.0]
-        self.an_control = rospy.Publisher('/Pall_POS_SET', Float32MultiArray, queue_size=5)
-        self.an_control_pos = rospy.Subscriber("/Pall_CURR_POS", Float32MultiArray, self.get_an_pose)
-        self.an_grasp_control = rospy.Publisher('/Pall_Grasp_Topic', Int32, queue_size=5)
-        self.an_grasp_state = rospy.Subscriber("/Pall_GRAB_STATUS", Int32, self.get_an_control)
+        self.an_control = rospy.Publisher('/Pall_POS_SET', Float32MultiArray, queue_size=5) # 发布坐标控制话题
+        self.an_control_pos = rospy.Subscriber("/Pall_CURR_POS", Float32MultiArray, self.get_an_pose)   #   订阅设备当前xyz坐标
+        self.an_grasp_control = rospy.Publisher('/Pall_Grasp_Topic', Int32, queue_size=5)   # 控制末端爪（1：抓取；0：松开）
+        self.an_grasp_state = rospy.Subscriber("/Pall_GRAB_STATUS", Int32, self.get_an_control) #   获取爪的状态
 
         # 主控视觉识别话题
         rospy.Subscriber('target_pose', Float32MultiArray, self.get_target_pose)
@@ -117,7 +117,7 @@ class AN_Mission_Test:
                 self.AN_Mqtt.on_publish(self.an_req_json, "/HG_DEV/ZK_ALL_REQ", 2)
                 time.sleep(0.5)
                 print("开始上货")
-                # 如果AGV上使用识别放置,先到放置点识别点识别
+                # 如果AGV上使用识别放置（AGV上面贴上识别）,先到放置点识别点识别
                 if self.vision_mode == 1:
                     # 发布获取放置识别点信息
                     self.set_push_state.publish(1)
@@ -184,11 +184,13 @@ class AN_Mission_Test:
                 #             if self.set_an_pose([0.0, 0.0, 100.0]):  # 放上去后先往上
                 #                 break
 
+    #   获取当前位姿
     def get_an_pose(self, data):
         self.an_current_x = data.data[0]
         self.an_current_y = data.data[1]
         self.an_current_z = data.data[2]
 
+    #  控制走 x y z 
     def set_an_pose(self, data):
         if data[0] != 0.0 or data[1] != 0.0:  # x,y不为0,先移动x,y再移动z
             move_xy = [data[0], data[1], self.an_current_z]
@@ -227,6 +229,7 @@ class AN_Mission_Test:
                     break
             return True
 
+    #   获取爪的状态
     def get_an_control(self, data):
         self.an_grasp_state = data.data
 
