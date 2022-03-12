@@ -1,0 +1,60 @@
+=====================MQTTT通信协议======================
+//塔吊
+MQTT话题:/HG_DEV/TD_MSG
+{
+	name:"TD",
+	dir:"TD", /ZK
+	cmd_type: 0,
+	pos:[x,y,z],
+  	"Grasp_Status": 1,
+  	"EmStop_Status": 1,
+	"Stop_Status": 1,
+	"Reset_Status": 0,
+	"Reset_x": 0,
+	"Reset_y": 0,
+	"error":"null"
+}
+
+MQTT话题
+QTT话题:/HG_DEV/MD_MSG
+//门吊
+{
+	name:"MD",
+	dir:"MD", /ZK
+	pos:[x,y,z],
+  	"Grasp_Status": 1,
+  	"EmStop_Status": 1,
+	"Stop_Status": 1,
+	"Reset_Status": 0,
+	"Reset_x": 0,
+	"Reset_y": 0,
+	"error":"null"
+}
+
+QTT话题:/HG_CAR/CAR_MSG
+//autuware AGV->发送
+{
+	name:"AGV"/"Auto",
+	dir:"TD",	/"MD"
+	ation: 1  	1:上料 0：下料 
+	"error":"null"
+}
+
+
+//门吊或塔吊->返回
+{
+	name:"TD",
+	dir:"AGV",   //AGV  Auto
+	ation: 1 , 	0:成功 1：失败 
+	"error":"null"
+}
+
+{
+	name:"MD",
+	dir:"Auto",	//AGV  Auto
+	ation: 1  ,	0:成功 1：失败 
+	"error":"null"
+}
+
+
+

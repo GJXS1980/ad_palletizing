@@ -1,0 +1,48 @@
+<launch>
+
+    <!--node pkg="palletizing" type="Palletizing_NODE" name="TD_Node">
+    </node-->
+
+    <include file="$(find usb_cam)/launch/ar_track_alvar_test.launch">
+    </include>
+
+    <node pkg="ad_palletizing" type="client_ros.py" name="IMG_Node">
+        <param name="host_ip" value="192.168.12.198" />
+        <param name="host_port" value="9999" />
+    </node>
+    
+    <node pkg="ad_palletizing" type="AN_Mission.py" name="Mission_Node">
+        <param name="host_ip" value="192.168.12.198" />
+        <param name="host_port" value="50002" />
+	<!--视觉识别模式, 1代表AGV上有码(识别放置,默认6号码),0表示无码(盲放)-->
+        <param name="vision_mode" value="0" />
+
+	<!--抓取识别点-->
+	<param name="grasp_x" value="80"/>
+	<param name="grasp_y" value="490"/>
+	<param name="grasp_z" value="10"/>
+
+	<!--放置识别点-->
+	<param name="push_x" value="200"/>
+	<param name="push_y" value="60"/>
+	<param name="push_z" value="30"/>
+
+	<!--默认放置点-->
+	<param name="real_push_x" value="200"/>
+	<param name="real_push_y" value="60"/>
+	<param name="real_push_z" value="250"/>
+    </node>
+    
+    <node pkg="ad_palletizing" type="AN_Vision.py" name="Vision_Node">
+        <param name="host_ip" value="192.168.12.198" />
+        <param name="host_port" value="50002" />
+        <!--视觉识别模式, 1代表AGV上有码(识别放置,默认6号码),0表示无码(盲放)-->
+        <param name="vision_mode" value="0" />
+	<!--视觉补偿-->
+        <param name="x_dis" value="15" />
+	<param name="y_dis" value="5" />
+	<param name="z_dis" value="-35" />
+    </node>
+
+</launch>
+

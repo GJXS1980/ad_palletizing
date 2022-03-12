@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<launch>
+  <node name="ad_palletizing" pkg="ad_palletizing" type="Palletizing_AD_NODE" output="screen" >
+    <param name="usart_port" value="/dev/ttyUSB0" />
+    <param name="mqtt_host" value="192.168.12.198" />
+    <param name="mqtt_port" value="50002" />
+    <!-- U轴夹爪抓取力度 单位/脉冲-->
+    <param name="clip_pulse" value="200" />
+  </node>
+
+</launch>
