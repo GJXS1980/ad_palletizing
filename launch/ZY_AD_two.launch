@@ -12,38 +12,38 @@
         <param name="host_port" value="9999" />
     </node>
     
-    <node pkg="ad_palletizing" type="AN_Mission.py" name="Mission_Node">
+    <node pkg="ad_palletizing" type="AN_Mission_two.py" name="Mission_Node">
         <param name="host_ip" value="192.168.12.198" />
         <param name="host_port" value="50002" />
-	    <!--视�?�识�?模式, 1代表AGV上有�?(识别放置,默�??6号码),0表示无码(盲放)-->
+	    <!-- 视觉识别模式, 1代表AGV上有码(识别放置,默认为6号码),0表示无码(盲放) -->
         <param name="vision_mode" value="0" />
 
-	    <!--抓取集�?��??1识别�?-->
+	    <!-- 抓取集装箱1识别位置 -->
 	    <param name="grasp_x1" value="80"/>
 	    <param name="grasp_y1" value="490"/>
 	    <param name="grasp_z1" value="10"/>
 
-	    <!--放置集�?��??1识别�?-->
+	    <!-- 放置集装箱1的位置 -->
 	    <param name="push_x1" value="200"/>
 	    <param name="push_y1" value="60"/>
 	    <param name="push_z1" value="30"/>
 
-	    <!--默�?�集装�??1放置�?-->
+	    <!-- 默认放置集装箱1位置 -->
 	    <param name="real_push_x1" value="200"/>
 	    <param name="real_push_y1" value="60"/>
 	    <param name="real_push_z1" value="250"/>
 
-        <!--抓取集�?��??2识别�?-->
+        <!-- 抓取集�?��??2识别�? -->
 	    <param name="grasp_x2" value="80"/>
 	    <param name="grasp_y2" value="490"/>
 	    <param name="grasp_z2" value="10"/>
 
-	    <!--放置集�?��??2识别�?-->
+	    <!--放置集�?��??2识别�?-->
 	    <param name="push_x2" value="200"/>
 	    <param name="push_y2" value="60"/>
 	    <param name="push_z2" value="30"/>
 
-	    <!--默�?�集装�??2放置�?-->
+	    <!-- 默�?�集装�??2放置�? -->
 	    <param name="real_push_x2" value="200"/>
 	    <param name="real_push_y2" value="60"/>
 	    <param name="real_push_z2" value="250"/>
@@ -51,15 +51,22 @@
 
     </node>
     
-    <node pkg="ad_palletizing" type="AN_Vision.py" name="Vision_Node">
+    <node pkg="ad_palletizing" type="AN_Vision_two.py" name="Vision_Node">
         <param name="host_ip" value="192.168.12.198" />
         <param name="host_port" value="50002" />
-        <!--视�?�识�?模式, 1代表AGV上有�?(识别放置,默�??6号码),0表示无码(盲放)-->
+
+        <!-- 视觉识别模式, 1代表AGV上有码(识别放置,默认为6号码),0表示无码(盲放) -->
         <param name="vision_mode" value="0" />
-	    <!--视�?�补�?-->
-        <param name="x_dis" value="15" />
-	    <param name="y_dis" value="5" />
-	    <param name="z_dis" value="-35" />
+
+	    <!-- 第一个集装箱视觉补偿 -->
+        <param name="x1_dis" value="15" />
+	    <param name="y1_dis" value="5" />
+	    <param name="z1_dis" value="-35" />
+
+	    <!-- 第二个集装箱视觉补偿 -->
+        <param name="x2_dis" value="15" />
+	    <param name="y2_dis" value="5" />
+	    <param name="z2_dis" value="-35" />
 
     </node>
 

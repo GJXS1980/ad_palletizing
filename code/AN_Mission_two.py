@@ -18,7 +18,7 @@ class AN_Mqtt():
         self.AN_Mission_Msg = 0
         #self.start_mqtt()
 
-    # 连接MQTT服务器
+    # 连接MQTT服务�?
     def on_mqtt_connect(self):
         self.mqttClient.connect(self.mqtt_host, self.mqtt_port, 60)
 
@@ -26,7 +26,7 @@ class AN_Mqtt():
     def on_subscribe(self):
         self.mqttClient.subscribe("/HG_DEV/ZK_ALL", 2)
         self.mqttClient.on_message = self.on_message_come  # 消息到来处理函数
-
+    #   �?动mqtt连接
     def start_mqtt(self):
         self.on_mqtt_connect()
         self.on_subscribe()
@@ -49,22 +49,39 @@ class AN_Mission_Test:
         rospy.init_node("an_node")
         self.host_ip = rospy.get_param("~host_ip", "192.168.10.124")
         self.host_port = rospy.get_param("~host_port", "50002")
-        # 视觉识别模式,0:AGV上没有码,盲放; 1:AGV上有码,识别放置
+        # 视�?�识�?模式,0:AGV上没有码,盲放; 1:AGV上有�?,识别放置
         self.vision_mode = rospy.get_param("~vision_mode", "0")
-        # 抓取识别点
-        self.grasp_x = int(rospy.get_param("~grasp_x", "80"))
-        self.grasp_y = int(rospy.get_param("~grasp_y", "490"))
-        self.grasp_z = int(rospy.get_param("~grasp_z", "10"))
-        
-        # 放置识别点
-        self.push_x = int(rospy.get_param("~push_x", "200"))
-        self.push_y = int(rospy.get_param("~push_y", "60"))
-        self.push_z = int(rospy.get_param("~push_z", "30"))
 
-        # 默认放置点
-        self.real_push_x = int(rospy.get_param("~real_push_x", "200"))
-        self.real_push_y = int(rospy.get_param("~real_push_y", "60"))
-        self.real_push_z = int(rospy.get_param("~real_push_z", "250"))
+        # 抓取识别�?
+        self.grasp_x1 = int(rospy.get_param("~grasp_x1", "80"))
+        self.grasp_y1 = int(rospy.get_param("~grasp_y1", "490"))
+        self.grasp_z1 = int(rospy.get_param("~grasp_z1", "10"))
+        
+        # 放置识别�?
+        self.push_x1 = int(rospy.get_param("~push_x1", "200"))
+        self.push_y1 = int(rospy.get_param("~push_y1", "60"))
+        self.push_z1 = int(rospy.get_param("~push_z1", "30"))
+
+        # 默�?�放�?�?
+        self.real_push_x1 = int(rospy.get_param("~real_push_x1", "200"))
+        self.real_push_y1 = int(rospy.get_param("~real_push_y1", "60"))
+        self.real_push_z1 = int(rospy.get_param("~real_push_z1", "250"))
+
+
+        # 抓取识别�?
+        self.grasp_x2 = int(rospy.get_param("~grasp_x2", "80"))
+        self.grasp_y2 = int(rospy.get_param("~grasp_y2", "490"))
+        self.grasp_z2 = int(rospy.get_param("~grasp_z2", "10"))
+        
+        # 放置识别�?
+        self.push_x2 = int(rospy.get_param("~push_x2", "200"))
+        self.push_y2 = int(rospy.get_param("~push_y2", "60"))
+        self.push_z2 = int(rospy.get_param("~push_z2", "30"))
+
+        # 默�?�放�?�?
+        self.real_push_x2 = int(rospy.get_param("~real_push_x2", "200"))
+        self.real_push_y2 = int(rospy.get_param("~real_push_y2", "60"))
+        self.real_push_z2 = int(rospy.get_param("~real_push_z2", "250"))
 
         self.an_req_msg = OrderedDict()
         self.an_req_msg["name"] = "AD"
@@ -80,14 +97,14 @@ class AN_Mission_Test:
         self.an_current_z = 0.0
         self.an_grasp_state = 0
         self.an_target_pose = [0.0, 0.0, 0.0]
-        # 放置点
+        # 放置�?
         self.push_target_pose = [0.0, 0.0, 0.0]
-        self.an_control = rospy.Publisher('/Pall_POS_SET', Float32MultiArray, queue_size=5)
-        self.an_control_pos = rospy.Subscriber("/Pall_CURR_POS", Float32MultiArray, self.get_an_pose)
-        self.an_grasp_control = rospy.Publisher('/Pall_Grasp_Topic', Int32, queue_size=5)
-        self.an_grasp_state = rospy.Subscriber("/Pall_GRAB_STATUS", Int32, self.get_an_control)
+        self.an_control = rospy.Publisher('/Pall_POS_SET', Float32MultiArray, queue_size=5) # 发布坐标控制话�??
+        self.an_control_pos = rospy.Subscriber("/Pall_CURR_POS", Float32MultiArray, self.get_an_pose)   # 订阅设�?�当前xyz坐标
+        self.an_grasp_control = rospy.Publisher('/Pall_Grasp_Topic', Int32, queue_size=5)   # 控制�?�?�?�?1：抓取；0：松开�?
+        self.an_grasp_state = rospy.Subscriber("/Pall_GRAB_STATUS", Int32, self.get_an_control) #   获取�?的状�?
 
-        # 主控视觉识别话题
+        # 主控视�?�识�?话�??
         rospy.Subscriber('target_pose', Float32MultiArray, self.get_target_pose)
         rospy.Subscriber('push_target_pose', Float32MultiArray, self.get_push_data)
         self.set_push_state = rospy.Publisher('/get_push_pose', Int32, queue_size=5)
@@ -116,43 +133,43 @@ class AN_Mission_Test:
                 self.an_req_json = json.dumps(self.an_req_msg)
                 self.AN_Mqtt.on_publish(self.an_req_json, "/HG_DEV/ZK_ALL_REQ", 2)
                 time.sleep(0.5)
-                print("开始上货")
-                # 如果AGV上使用识别放置,先到放置点识别点识别
+                print("开始上�?")
+                # 如果AGV上使用识�?放置（AGV上面贴上识别�?,先到放置点识�?点识�?
                 if self.vision_mode == 1:
-                    # 发布获取放置识别点信息
+                    # 发布获取放置识别点信�?
                     self.set_push_state.publish(1)
-                    # 移动到放置识别点
+                    # 移动到放�?识别�?
                     if self.set_an_pose([self.push_x, self.push_y, self.push_z]):
-                        # 识别放置坐标并记录(普通ar码识别)
+                        # 识别放置坐标并�?�录(�?通ar码识�?)
                         try:
                             data = rospy.wait_for_message("push_target_pose", Float32MultiArray)
                             self.push_target_pose = data.data
                         except:
                             pass
 
-                # 移动到抓取识别点
-                if self.set_an_pose([self.grasp_x, self.grasp_y, self.grasp_z]):
+                # 移动到抓取识�?�?
+                if self.set_an_pose([self.grasp_x1, self.grasp_y1, self.grasp_z1]):
                     try:
-                        # 识别抓取坐标并执行(从主控界面发送视觉识别物体编号,并接受坐标话题)
+                        # 识别抓取坐标并执�?(从主控界面发送�?��?�识�?物体编号,并接受坐标话�?)
                         data = rospy.wait_for_message("target_pose", Float32MultiArray)
                         if self.set_an_pose(data.data):
                             #time.sleep(1.5)
                             self.set_an_grasp_control(1)
                         #time.sleep(1.0)
                         #while True:
-                            #if self.an_grasp_state:  # 已经抓上来
+                            #if self.an_grasp_state:  # 已经抓上�?
                             #    break
                             #else:
                                 #self.set_an_grasp_control(1)
                                 #time.sleep(1.0)
-                        # 往上提起物体并;移动到放置识别点
+                        # 往上提起物体并;移动到放�?识别�?
                         if self.set_an_pose([0.0, 0.0, 30.0]):
-                            if self.set_an_pose([self.push_x, self.push_y, self.push_z]):
+                            if self.set_an_pose([self.push_x1, self.push_y1, self.push_z1]):
                                 if self.vision_mode == 1 and self.push_target_pose[2]!=0.0:
-                                    if self.set_an_pose(self.push_target_pose): # 识别放置点
+                                    if self.set_an_pose(self.push_target_pose): # 识别放置�?
                                         print("push target")
                                 else:
-                                    if self.set_an_pose([self.real_push_x, self.real_push_y, self.real_push_z]): # 盲放位置点
+                                    if self.set_an_pose([self.real_push_x1, self.real_push_y1, self.real_push_z1]): # 盲放位置�?
                                         print("push target")
                                 time.sleep(1.0)
                                 self.set_an_grasp_control(0)
@@ -163,32 +180,70 @@ class AN_Mission_Test:
                                     else:
                                         self.set_an_grasp_control(0)
 
-                                if self.set_an_pose([0.0, 0.0, 20.0]):  # 放上去后先往上
-                                    self.an_req_msg["state"] = "finish"
-                                    self.an_req_json = json.dumps(self.an_req_msg)
-                                    self.AN_Mqtt.on_publish(self.an_req_json, "/HG_DEV/ZK_ALL_REQ", 2)
+                                if self.set_an_pose([0.0, 0.0, 20.0]):  # 放上去后先往�?
+                                    try:
+                                        # 识别抓取坐标并执�?(从主控界面发送�?��?�识�?物体编号,并接受坐标话�?)
+                                        data1 = rospy.wait_for_message("target_pose1", Float32MultiArray)
+                                        if self.set_an_pose(data1.data):
+                                            #time.sleep(1.5)
+                                            self.set_an_grasp_control(1)
+                                        #time.sleep(1.0)
+                                        #while True:
+                                            #if self.an_grasp_state:  # 已经抓上�?
+                                            #    break
+                                            #else:
+                                                #self.set_an_grasp_control(1)
+                                                #time.sleep(1.0)
+                                        # 往上提起物体并;移动到放�?识别�?
+                                        if self.set_an_pose([0.0, 0.0, 30.0]):
+                                            if self.set_an_pose([self.push_x2, self.push_y2, self.push_z2]):
+                                                if self.vision_mode == 1 and self.push_target_pose[2]!=0.0:
+                                                    if self.set_an_pose(self.push_target_pose): # 识别放置�?
+                                                        print("push target")
+                                                else:
+                                                    if self.set_an_pose([self.real_push_x2, self.real_push_y2, self.real_push_z2]): # 盲放位置�?
+                                                        print("push target")
+                                                time.sleep(1.0)
+                                                self.set_an_grasp_control(0)
+                                                time.sleep(1.0)
+                                                while True:
+                                                    if not self.an_grasp_state:  # 已经放开
+                                                        break
+                                                    else:
+                                                        self.set_an_grasp_control(0)
+
+                                                if self.set_an_pose([0.0, 0.0, 20.0]):  # 放上去后先往�?
+                                                    
+                                                    self.an_req_msg["state"] = "finish"
+                                                    self.an_req_json = json.dumps(self.an_req_msg)
+                                                    self.AN_Mqtt.on_publish(self.an_req_json, "/HG_DEV/ZK_ALL_REQ", 2)
+                                    except:
+                                        pass
+
                     except:
                         pass
             
-                # if self.set_an_pose([150.0, 650.0, 510.0]):  # 抓取点
+                # if self.set_an_pose([150.0, 650.0, 510.0]):  # 抓取�?
                 #     self.set_an_grasp_control(1)
                 # while True:
-                #     if self.an_grasp_state:  # 已经抓上来
+                #     if self.an_grasp_state:  # 已经抓上�?
                 #         break
 
-                # if self.set_an_pose([0.0, 0.0, 300.0]):  # 抓到后先往上
-                #     if self.set_an_pose([130.0, 75.0, 520.0]):  # 放置点
+                # if self.set_an_pose([0.0, 0.0, 300.0]):  # 抓到后先往�?
+                #     if self.set_an_pose([130.0, 75.0, 520.0]):  # 放置�?
                 #         self.set_an_grasp_control(0)
                 #     while True:
-                #         if not self.an_grasp_state:  # 已经放上去
-                #             if self.set_an_pose([0.0, 0.0, 100.0]):  # 放上去后先往上
+                #         if not self.an_grasp_state:  # 已经放上�?
+                #             if self.set_an_pose([0.0, 0.0, 100.0]):  # 放上去后先往�?
                 #                 break
 
+    #   获取当前位姿
     def get_an_pose(self, data):
         self.an_current_x = data.data[0]
         self.an_current_y = data.data[1]
         self.an_current_z = data.data[2]
 
+    #  控制�? x y z 
     def set_an_pose(self, data):
         if data[0] != 0.0 or data[1] != 0.0:  # x,y不为0,先移动x,y再移动z
             move_xy = [data[0], data[1], self.an_current_z]
@@ -216,7 +271,7 @@ class AN_Mission_Test:
                     self.wait_time = 0
                     break
             return True
-        else:  # x,y为0则单独控制z
+        else:  # x,y�?0则单�?控制z
             move_z = [self.an_current_x, self.an_current_y, data[2]]
             target_pose = Float32MultiArray(data=move_z)
             for i in range(4):
@@ -227,6 +282,7 @@ class AN_Mission_Test:
                     break
             return True
 
+    #   获取�?的状�?
     def get_an_control(self, data):
         self.an_grasp_state = data.data
 
@@ -235,6 +291,6 @@ class AN_Mission_Test:
         self.an_grasp_control.publish(data)
         time.sleep(0.2)
 
-# if __name__ == '__main__':
-#     an_start = AN_Mission_Test()
-#     rospy.spin()
+if __name__ == '__main__':
+    an_start = AN_Mission_Test()
+    rospy.spin()

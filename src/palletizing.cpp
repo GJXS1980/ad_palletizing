@@ -1021,6 +1021,9 @@ int main(int argc,char **argv)
         palletizing_data.cmd_type = 0x01;
         send_pall_cmd();	
 		usleep(1000*500);
+		palletizing_data.cmd_type = 0x06;
+		send_pall_cmd();
+		usleep(1000*500);
 		palletizing_data.x_data.x = recei_pall_data.X_Curr;        
 		palletizing_data.y_data.y = recei_pall_data.Y_Curr;
 		palletizing_data.z_data.z = recei_pall_data.Z_Curr;
