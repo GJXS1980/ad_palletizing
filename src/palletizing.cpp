@@ -181,8 +181,9 @@ int kbhit()
 {
 	char ch;
     int nread;
-    if ( peek_character != -1 )
-        return(1);
+    if ( peek_character != -1 ) 
+		return(1);
+
 	//	TIME = 0
     new_settings.c_cc[VMIN] = 0;
     tcsetattr( 0, TCSANOW, &new_settings );
@@ -240,21 +241,21 @@ void *capture_keyvalue(void*)
         if (kbhit())
         {
             key = readch(); 
-	    if(key == 3)
-	    {
-			close_keyboard();
-			key_runing = 0;
-  	    }
-//	    else
-//            	printf( "You put %c(%d)\n", key,key);
+			if(key == 3)
+			{
+				close_keyboard();
+				key_runing = 0;
+			}
+	//	    else
+	//            	printf( "You put %c(%d)\n", key,key);
 
         }
- 	ros::spinOnce(); 
-	usleep(1000*5); 
+ 		ros::spinOnce(); 
+		usleep(1000*5); 
     }	
 
-     close_keyboard();	
-     pthread_exit(NULL);
+    close_keyboard();	
+    pthread_exit(NULL);
 }
 
  /********************************
@@ -308,86 +309,86 @@ float Data_Analysis(unsigned char *buf, int axis)
  ********************************/
 void* read_data_thread(void *parameter)
 {
-		// 将线程状态改为unjoinable状态，确保资源的释放
-        pthread_detach(pthread_self()); 
-        std::string data;
-        uint8_t ch[50]={0};
+	// 将线程状态改为unjoinable状态，确保资源的释放
+    pthread_detach(pthread_self()); 
+    std::string data;
+    uint8_t ch[50]={0};
 	
-        Pall_Serial.flush();	//	等待串口数据发送结束
-        while(Pall_recei_runing)
-        {   
-			if(Pall_Serial.available())
-            {
-	            usleep(10*1000); 
-                data=Pall_Serial.read(Pall_Serial.available());
-				int len = data.length();
-	//			printf("\nlen:%d\r\n",data.length());
+    Pall_Serial.flush();	//	等待串口数据发送结束
+    while(Pall_recei_runing)
+    {   
+		if(Pall_Serial.available())
+        {
+			usleep(10*1000); 
+            data=Pall_Serial.read(Pall_Serial.available());
+			int len = data.length();
+//			printf("\nlen:%d\r\n",data.length());
 
-				if(len<5 || len>30)
-				{
-					Pall_Serial.flush();
-					data.clear();
-					memset(receri_data,0,50);	
-					continue;	
-				}
+			if(len<5 || len>30)
+			{
+				Pall_Serial.flush();
+				data.clear();
+				memset(receri_data,0,50);	
+				continue;	
+			}
 
-				for(int i=0; i<data.length(); i++)
-					receri_data[i] = data[i];
-				unsigned char crc =  CRC_Calculate(receri_data,data.length() -2 );
-				if(crc != receri_data[data.length() -2] && data.length()>5 && data.length()<25)
-				{
-					//Pall_Serial.flush();
-					data.clear();
-					memset(receri_data,0,50);	
-					continue;	
-				}		
+			for(int i=0; i<data.length(); i++)
+				receri_data[i] = data[i];
+			unsigned char crc =  CRC_Calculate(receri_data,data.length() -2 );
+			if(crc != receri_data[data.length() -2] && data.length()>5 && data.length()<25)
+			{
+				//Pall_Serial.flush();
+				data.clear();
+				memset(receri_data,0,50);	
+				continue;	
+			}		
 
-				recei_pall_data.cmd_type = receri_data[1];
-				if(recei_pall_data.cmd_type  == 0x01)
-				{
-
-					std_msgs::Float32MultiArray PALL_POS;
-					std_msgs::Int32 GRAB_STATUS;
-					recei_pall_data.X_Curr = Data_Analysis(receri_data,1);
-					recei_pall_data.Y_Curr = Data_Analysis(receri_data,2);
-					recei_pall_data.Z_Curr = Data_Analysis(receri_data,3);
-					recei_pall_data.U_Curr = Data_Analysis(receri_data,4);	
+			recei_pall_data.cmd_type = receri_data[1];
+			if(recei_pall_data.cmd_type  == 0x01)
+			{
+				std_msgs::Float32MultiArray PALL_POS;
+				std_msgs::Int32 GRAB_STATUS;
+				recei_pall_data.X_Curr = Data_Analysis(receri_data,1);
+				recei_pall_data.Y_Curr = Data_Analysis(receri_data,2);
+				recei_pall_data.Z_Curr = Data_Analysis(receri_data,3);
+				recei_pall_data.U_Curr = Data_Analysis(receri_data,4);	
 					
-					recei_pall_data.GRAB_STATUS=receri_data[14];
-					recei_pall_data.STOP_STATUS=receri_data[15];				
+				recei_pall_data.GRAB_STATUS=receri_data[14];
+				recei_pall_data.STOP_STATUS=receri_data[15];				
 		
-					temp_pos[0]=recei_pall_data.X_Curr;
-					temp_pos[1]=recei_pall_data.Y_Curr;
-					temp_pos[2]=recei_pall_data.Z_Curr;
+				temp_pos[0]=recei_pall_data.X_Curr;
+				temp_pos[1]=recei_pall_data.Y_Curr;
+				temp_pos[2]=recei_pall_data.Z_Curr;
 										
-					PALL_POS.data.push_back(recei_pall_data.X_Curr);
-					PALL_POS.data.push_back(recei_pall_data.Y_Curr);
-					PALL_POS.data.push_back(recei_pall_data.Z_Curr);
-					pos_publisher.publish(PALL_POS);
+				PALL_POS.data.push_back(recei_pall_data.X_Curr);
+				PALL_POS.data.push_back(recei_pall_data.Y_Curr);
+				PALL_POS.data.push_back(recei_pall_data.Z_Curr);
+				pos_publisher.publish(PALL_POS);
 					
-					GRAB_STATUS.data = recei_pall_data.GRAB_STATUS;
-					grab_publisher.publish(GRAB_STATUS);
-					SEND_PALL_DATA();			//发布当前位置数据
-					printf("\r实时坐标:X:%.2f Y:%.2f Z:%.2f GRAB_STATUS:%d",  
-					recei_pall_data.X_Curr,recei_pall_data.Y_Curr,recei_pall_data.Z_Curr,GRAB_STATUS.data);
-					fflush(stdout);
-				}
+				GRAB_STATUS.data = recei_pall_data.GRAB_STATUS;
+				grab_publisher.publish(GRAB_STATUS);
+				SEND_PALL_DATA();			//发布当前位置数据
+				printf("\r实时坐标:X:%.2f Y:%.2f Z:%.2f GRAB_STATUS:%d",  
+				recei_pall_data.X_Curr,recei_pall_data.Y_Curr,recei_pall_data.Z_Curr,GRAB_STATUS.data);
+				fflush(stdout);
+			}
+
 #if DEBUG_R
-					printf("------------------------------------------------------\r\n");
-					for(int i=0; i<data.length(); i++)
-					{
-						printf("%#02X ",receri_data[i]);
-					}	
-					printf("\n------------------------------------------------------\r\n");
+			printf("------------------------------------------------------\r\n");
+			for(int i=0; i<data.length(); i++)
+			{
+				printf("%#02X ",receri_data[i]);
+			}	
+			printf("\n------------------------------------------------------\r\n");
 					
 #endif
-					data.clear();
-					memset(receri_data,0,50);
+			data.clear();
+			memset(receri_data,0,50);
 
-			}
-			//Pall_Serial.flush();
-			usleep(10*1000); 
 		}
+		//Pall_Serial.flush();
+		usleep(10*1000); 
+	}
 }
 
  /********************************
@@ -421,16 +422,19 @@ void send_pall_cmd()
     {
     	palletizing_data.send_data[i+2] = palletizing_data.x_data.x_byte[i];  //X
     }
+
 	//	赋值Y数据，从6字节开始，共四个字节
     for(int i = 0; i<4;i++)
     {
     	palletizing_data.send_data[i+6] = palletizing_data.y_data.y_byte[i];  //Y
     }
+
 	//	赋值Z数据，从10字节开始，共四个字节
     for(int i = 0; i<4;i++)
     {
     	palletizing_data.send_data[i+10] = palletizing_data.z_data.z_byte[i];  //Z
     }  
+
 	//	预留U轴
     for(int i = 0; i<4;i++)
     {
@@ -528,7 +532,6 @@ void init_keyboard()
 ********************************/
 void SEND_PALL_DATA(void)
 {
-
 	cJSON * root =  cJSON_CreateObject();
     cJSON * pall_pos =  cJSON_CreateObject();
 	char *message = NULL;
@@ -866,7 +869,8 @@ void subscribe_callback(struct mosquitto *mosq, void *userdata, int mid, int qos
 {
     int i;
     printf("Subscribed (mid: %d): %d", mid, granted_qos[0]);
-    for(i=1; i<qos_count; i++){
+    for(i=1; i<qos_count; i++)
+	{
         printf(", %d", granted_qos[i]);
     }
     printf("\n");
@@ -888,20 +892,20 @@ void my_log_callback(struct mosquitto *mosq, void *userdata, int level, const ch
 ********************************/ 
 void* mqtt_data_thread(void *parameter)
 {
-		pthread_detach(pthread_self()); 
-        while(mqtt_sub_runing)
-        {
-	        //	无限阻塞循环调用loop（），mosq:mosq客户端，timeout：-1为使用默认值为1000ms，max_packets：1为未使用
-	    	mosquitto_loop_forever(mosq, -1, 1);
-	       //	网络事件循环处理函数，通过创建新的线程不断调用mosquitto_loop() 函数处理网络事件，不阻塞
-	       int loop = mosquitto_loop_start(mosq);	// 成功时返回MOSQ_ERR_SUCCESS 
-	       if(loop != MOSQ_ERR_SUCCESS)
-	       {
+	pthread_detach(pthread_self()); 
+    while(mqtt_sub_runing)
+    {
+		//	无限阻塞循环调用loop（），mosq:mosq客户端，timeout：-1为使用默认值为1000ms，max_packets：1为未使用
+	    mosquitto_loop_forever(mosq, -1, 1);
+	    //	网络事件循环处理函数，通过创建新的线程不断调用mosquitto_loop() 函数处理网络事件，不阻塞
+	    int loop = mosquitto_loop_start(mosq);	// 成功时返回MOSQ_ERR_SUCCESS 
+	    if(loop != MOSQ_ERR_SUCCESS)
+	    {
 			printf("mosquitto loop error\n");
-	       }
+	    }
 		ros::spinOnce();
 	    usleep(1000*5);
-        }
+    }
 }
 
  /********************************
@@ -914,7 +918,7 @@ void pall_movie_limit(void)
 	if( palletizing_data.x_data.x >750 )  
 	    palletizing_data.x_data.x = 750;
 	else if( palletizing_data.x_data.x < -100)
-            palletizing_data.x_data.x = -100;
+        palletizing_data.x_data.x = -100;
 
 	if(palletizing_data.y_data.y > 750) 
 	    palletizing_data.y_data.y = 750;
@@ -933,106 +937,101 @@ void pall_movie_limit(void)
 ********************************/
 int main(int argc,char **argv)
 {
-        ros::init(argc, argv, "Palletizing_NODE"); 
+	ros::init(argc, argv, "Palletizing_NODE"); 
+    static int gruab = 1;
+    ros::NodeHandle n;
+    ros::NodeHandle nh("~");        
+    std:: string usart_port;
 
-        static int gruab = 1;
-        ros::NodeHandle n;
+    grab_publisher = n.advertise<std_msgs::Int32>("/Pall_GRAB_STATUS", 1);  //	发布抓取状态
+    pos_publisher = n.advertise<std_msgs::Float32MultiArray>("/Pall_CURR_POS", 1);  //	发布当前位姿话题
+    ros::Subscriber RUNNING_SUB = n.subscribe("/Pall_Running_Topic", 5,&Pall_Running_Back);	// 开始和暂停控制话题
+    ros::Subscriber Grasp_SUB = n.subscribe("/Pall_Grasp_Topic", 5,&Grasp_Status_Back);
+    ros::Subscriber RESET_SUB = n.subscribe("/Pall_Reset_Topic", 5,&Pall_Reset_Back);
+    ros::Subscriber PALL_POS_SUB = n.subscribe("/Pall_POS_SET", 5,&Pall_POS_Back);	//topic
+    nh.param<std::string>("usart_port", usart_port,  "/dev/ttyUSB0");
+    nh.param<std::string>("mqtt_host",  mqtt_host,  "192.168.10.124");
+    nh.param<int>("mqtt_port",  mqtt_port,  50002);
+    nh.param<float>("clip_pulse",  clip_pulse,  2000);  
 
-        ros::NodeHandle nh("~");        
-        std:: string usart_port;
+	//	串口连接
+    try
+    {
+		Pall_Serial.setPort(usart_port);
+        Pall_Serial.setBaudrate(115200);
 
-        grab_publisher = n.advertise<std_msgs::Int32>("/Pall_GRAB_STATUS", 1);  //	发布抓取状态
-        pos_publisher = n.advertise<std_msgs::Float32MultiArray>("/Pall_CURR_POS", 1);  //	发布当前位姿话题
-        ros::Subscriber RUNNING_SUB = n.subscribe("/Pall_Running_Topic", 5,&Pall_Running_Back);	// 开始和暂停控制话题
-        ros::Subscriber Grasp_SUB = n.subscribe("/Pall_Grasp_Topic", 5,&Grasp_Status_Back);
-        ros::Subscriber RESET_SUB = n.subscribe("/Pall_Reset_Topic", 5,&Pall_Reset_Back);
-        ros::Subscriber PALL_POS_SUB = n.subscribe("/Pall_POS_SET", 5,&Pall_POS_Back);	//topic
-
-
-        nh.param<std::string>("usart_port", usart_port,  "/dev/ttyUSB0");
-        nh.param<std::string>("mqtt_host",  mqtt_host,  "192.168.10.124");
-        nh.param<int>("mqtt_port",  mqtt_port,  50002);
-
-        nh.param<float>("clip_pulse",  clip_pulse,  2000);  
-
-		//	串口连接
-        try
-        {
-                Pall_Serial.setPort(usart_port);
-                Pall_Serial.setBaudrate(115200);
-
-                serial::Timeout timeout=serial::Timeout::simpleTimeout(2000);
-                Pall_Serial.setTimeout(timeout);
-                Pall_Serial.open();
-        }
-        catch (serial::IOException& e)
-        {
-                 ROS_ERROR_STREAM("open Palletizing falied!"); 
-        }
+        serial::Timeout timeout=serial::Timeout::simpleTimeout(2000);
+        Pall_Serial.setTimeout(timeout);
+        Pall_Serial.open();
+    }
+    catch (serial::IOException& e)
+    {
+		ROS_ERROR_STREAM("open Palletizing falied!"); 
+    }
 	
-		init_keyboard();
+	init_keyboard();
 
-		//	新创建的线程ID指向的内存单元
-        pthread_t 	recei_thread,input_key,mqtt_thread;
+	//	新创建的线程ID指向的内存单元
+    pthread_t 	recei_thread,input_key,mqtt_thread;
 
-		//	创建线程不断读取RS232的数据
-        pthread_create(&recei_thread, NULL, read_data_thread, NULL);
+	//	创建线程不断读取RS232的数据
+    pthread_create(&recei_thread, NULL, read_data_thread, NULL);
 
-		//	创建线程线程监听键盘事件
-		pthread_create(&input_key, NULL, capture_keyvalue, NULL);
+	//	创建线程线程监听键盘事件
+	pthread_create(&input_key, NULL, capture_keyvalue, NULL);
 
-		// 初始化mosquitto库函数
-    	mosquitto_lib_init();  							//libmosquitto 库初始化   	
-    	// 新建mosquitto客户端，生成一个随机客户端ID
-		mosq = mosquitto_new(NULL,session,NULL);  				//创建mosquitto客户端
-    	if(!mosq)
-		{
-        	printf("创建 MQTT 连接失败..\n");
-        	mosquitto_lib_cleanup();
-        	return 1;
-    	}
+	// 初始化mosquitto库函数
+    mosquitto_lib_init();  							//libmosquitto 库初始化   	
+    // 新建mosquitto客户端，生成一个随机客户端ID
+	mosq = mosquitto_new(NULL,session,NULL);  				//创建mosquitto客户端
+    if(!mosq)
+	{
+        printf("创建 MQTT 连接失败..\n");
+        mosquitto_lib_cleanup();
+        return 1;
+    }
     	
-    	//mosquitto_log_callback_set(mosq, my_log_callback);  			//设置回调函数，需要时可使用
- 
-		//	连接确认car_connect回调函数，订阅岸吊mqtt消息
-    	mosquitto_connect_callback_set(mosq, car_connect);
+    //mosquitto_log_callback_set(mosq, my_log_callback);  			//设置回调函数，需要时可使用
+	//	连接确认car_connect回调函数，订阅岸吊mqtt消息
+    mosquitto_connect_callback_set(mosq, car_connect);
+	//	连接确认car_message回调函数，处理mosq客户端数据
+    mosquitto_message_callback_set(mosq, car_message);
 
-		//	连接确认car_message回调函数，处理mosq客户端数据
-    	mosquitto_message_callback_set(mosq, car_message);
-
-    	//mosquitto_subscribe_callback_set(mosq, subscribe_callback);
-		//	连接mqtt
-    	if(mosquitto_connect(mosq, mqtt_host.c_str(), mqtt_port, KEEP_ALIVE))  			//客户端连接服务器
-        {   
-        	fprintf(stderr, "\nUnable to connect.\n");
-        	printf("MQTT 连接失败...\n");
-        	return 1;
-    	}
+    //mosquitto_subscribe_callback_set(mosq, subscribe_callback);
+	//	连接mqtt
+    if(mosquitto_connect(mosq, mqtt_host.c_str(), mqtt_port, KEEP_ALIVE))  			//客户端连接服务器
+    {   
+		fprintf(stderr, "\nUnable to connect.\n");
+        printf("MQTT 连接失败...\n");
+        return 1;
+    }
 	
-		mqtt_sub_runing = 1;	//	循环处理mqtt数据标志
+	mqtt_sub_runing = 1;	//	循环处理mqtt数据标志
 
-		//	创建线程循环处理网络消息
-        pthread_create(&mqtt_thread, NULL, mqtt_data_thread, NULL); 
+	//	创建线程循环处理网络消息
+    pthread_create(&mqtt_thread, NULL, mqtt_data_thread, NULL); 
 
-		palletizing_data.send_data[0] = Header_Frame;	// 帧头
-		palletizing_data.send_data[19] = Tail_Frame;	// 帧尾
+	palletizing_data.send_data[0] = Header_Frame;	// 帧头
+	palletizing_data.send_data[19] = Tail_Frame;	// 帧尾
  
-		palletizing_data.x_data.x = clip_pulse;	//	夹爪力度控制接口
-        palletizing_data.cmd_type = 0x01;
-        send_pall_cmd();	
-		usleep(1000*500);
-		palletizing_data.cmd_type = 0x06;
-		send_pall_cmd();
-		usleep(1000*500);
-		palletizing_data.x_data.x = recei_pall_data.X_Curr;        
-		palletizing_data.y_data.y = recei_pall_data.Y_Curr;
-		palletizing_data.z_data.z = recei_pall_data.Z_Curr;
-		palletizing_data.u_data.u = recei_pall_data.U_Curr;
+	palletizing_data.x_data.x = clip_pulse;	//	夹爪力度控制接口
+    palletizing_data.cmd_type = 0x01;
+    send_pall_cmd();	
+	usleep(1000*500);
 
-        unsigned int curr_count = 0;
-		while(ros::ok())
-        {
-			/**************************************************
+	//	初始化松开爪子
+	palletizing_data.cmd_type = 0x06;
+	send_pall_cmd();
+	usleep(1000*500);
+	palletizing_data.x_data.x = recei_pall_data.X_Curr;        
+	palletizing_data.y_data.y = recei_pall_data.Y_Curr;
+	palletizing_data.z_data.z = recei_pall_data.Z_Curr;
+	palletizing_data.u_data.u = recei_pall_data.U_Curr;
+
+    unsigned int curr_count = 0;
+	while(ros::ok())
+    {
+		/**************************************************
 			a: x-
 			d: x+
 			w: y+
@@ -1043,79 +1042,79 @@ int main(int argc,char **argv)
 			1： x复位
 			2： y复位
 			3： 退出键盘控制
-			***************************************************/
-			switch(key)
-			{
-				case 'a': 	
-							palletizing_data.x_data.x -= 1.30;
-        		    		palletizing_data.cmd_type = 0x00;
-					  		send_pall_cmd();
-					  		break;
+		***************************************************/
+		switch(key)
+		{
+			case 'a': 	
+						palletizing_data.x_data.x -= 1.30;
+        		    	palletizing_data.cmd_type = 0x00;
+					  	send_pall_cmd();
+					  	break;
 
-				case 'd':   
-							palletizing_data.x_data.x += 1.30;
-			       			palletizing_data.cmd_type = 0x00;   
-                            send_pall_cmd();	
-			       			break;
+			case 'd':   
+						palletizing_data.x_data.x += 1.30;
+			       		palletizing_data.cmd_type = 0x00;   
+                        send_pall_cmd();	
+			       		break;
 
-		  		case 'w':   
-				  			palletizing_data.y_data.y += 1.30;
- 			       			palletizing_data.cmd_type = 0x00;  
-                            send_pall_cmd();  	
-			       			break;
+		  	case 'w':   
+				  		palletizing_data.y_data.y += 1.30;
+ 			       		palletizing_data.cmd_type = 0x00;  
+                        send_pall_cmd();  	
+			       		break;
 
-		  		case 's':   
-				  			palletizing_data.y_data.y -= 1.30;  
-			      			palletizing_data.cmd_type = 0x00;	
-                            send_pall_cmd();  
-			      			break;
+		  	case 's':   
+				  		palletizing_data.y_data.y -= 1.30;  
+			      		palletizing_data.cmd_type = 0x00;	
+                        send_pall_cmd();  
+			      		break;
 
-		  		case 'q':   
-				  			palletizing_data.z_data.z += 1.5;
- 			       			palletizing_data.cmd_type = 0x00;  
-                            send_pall_cmd();  	
-			       			break;
+		  	case 'q':   
+				  		palletizing_data.z_data.z += 1.5;
+ 			       		palletizing_data.cmd_type = 0x00;  
+                        send_pall_cmd();  	
+			       		break;
 
-		  		case 'e':   
-				  			palletizing_data.z_data.z -= 1.5; 
-			      			palletizing_data.cmd_type = 0x00;	
-                            send_pall_cmd();  
-			      			break;
+		  	case 'e':   
+				  		palletizing_data.z_data.z -= 1.5; 
+			      		palletizing_data.cmd_type = 0x00;	
+                        send_pall_cmd();  
+			      		break;
 
-		  		case 'f':   
-				  			if(gruab)
-			      				palletizing_data.cmd_type = 0x05;
-			      			else 
-		      	        		palletizing_data.cmd_type = 0x06;
-			      			gruab = !gruab;		
-                            send_pall_cmd();  
-			      			break;
+		  	case 'f':   
+				  		if(gruab)
+			      			palletizing_data.cmd_type = 0x05;
+			      		else 
+		      	        	palletizing_data.cmd_type = 0x06;
+			      		gruab = !gruab;		
+                        send_pall_cmd();  
+			      		break;
 
-		  		case '1':   
-				  			palletizing_data.cmd_type = 0x07;	
-                            send_pall_cmd();
-			      			palletizing_data.x_data.x = 0.0;  
-			      			break;
+		  	case '1':   
+				  		palletizing_data.cmd_type = 0x07;	
+                        send_pall_cmd();
+			      		palletizing_data.x_data.x = 0.0;  
+			      		break;
 
-		  		case '2':   
-				  			palletizing_data.cmd_type = 0x08;	
-                            send_pall_cmd(); 
-                            palletizing_data.y_data.y = 0.0;   
-			      			break;
+		  	case '2':   
+				  		palletizing_data.cmd_type = 0x08;	
+                        send_pall_cmd(); 
+                        palletizing_data.y_data.y = 0.0;   
+			      		break;
 
-		  		case  3: 
-				  			goto exit;break;
+		  	case  3: 
+				  		goto exit;break;
 		 
-		  		default:
+		  	default:
 /*
 							palletizing_data.x_data.x = recei_pall_data.X_Curr;        
 							palletizing_data.y_data.y = recei_pall_data.Y_Curr;
 							palletizing_data.z_data.z = recei_pall_data.Z_Curr;
 							palletizing_data.u_data.u = recei_pall_data.U_Curr; 
 */
-							break;
+						break;
 
-	     	}
+	    }
 /*		//将坐标做负反馈
 
            if(key == 0)
@@ -1132,10 +1131,10 @@ int main(int argc,char **argv)
 	   else curr_count = -1;		
  */
 
-            key = 0;
-			usleep(1000*45);
-			ros::spinOnce();
-        }
+        key = 0;
+		usleep(1000*45);
+		ros::spinOnce();
+    }
 
 //资源回收	
 exit:
