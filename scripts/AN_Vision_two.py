@@ -142,9 +142,9 @@ class AN_Vision():
                 #    取最大和最小幅度平均值加上在z方向的补偿
                 target_high = (self.min_high + self.max_high) / 2
                 #   求解公式：target_x = current_x + ar_pose_x + dis_x,etc.
-                target_pose = [self.an_current_x+self.ar_pose_array[0][1]+self.x1_dis, self.an_current_y+self.ar_pose_array[0][0]+self.y1_dis, self.an_current_z + target_high + self.z1_dis]
+                target_pose = [self.an_current_x-self.ar_pose_array[0][1]+self.x1_dis, self.an_current_y-self.ar_pose_array[0][0]+self.y1_dis, self.an_current_z + target_high + self.z1_dis]
                 
-                target_pose1 = [self.an_current_x+self.ar_pose_array[0][1]+self.x2_dis, self.an_current_y+self.ar_pose_array[0][0]+self.y2_dis, self.an_current_z+target_high + self.z2_dis]
+                target_pose1 = [self.an_current_x-self.ar_pose_array[0][1]+self.x2_dis, self.an_current_y-self.ar_pose_array[0][0]+self.y2_dis, self.an_current_z+target_high + self.z2_dis]
 
                 self.an_vision_req_msg["action"] = self.AN_Vision_Mqtt.AN_Vision_Type
                 self.an_vision_req_msg["target_pose"] = target_pose#[self.ar_pose_array[0][0], self.ar_pose_array[0][1], self.ar_pose_array[0][2]]
@@ -170,8 +170,8 @@ class AN_Vision():
             if self.dete_time >= 10:
                 target_high = (self.min_high + self.max_high) / 2
 
-                target_pose = [self.an_current_x+self.ar_pose_array[1][1]+self.x1_dis, self.an_current_y+self.ar_pose_array[1][0]+self.y1_dis, self.an_current_z + target_high + self.z1_dis]
-                target_pose1 = [self.an_current_x+self.ar_pose_array[1][1]+self.x2_dis, self.an_current_y+self.ar_pose_array[1][0]+self.y2_dis, self.an_current_z+target_high + self.z2_dis]
+                target_pose = [self.an_current_x-self.ar_pose_array[1][1]+self.x1_dis, self.an_current_y-self.ar_pose_array[1][0]+self.y1_dis, self.an_current_z + target_high + self.z1_dis]
+                target_pose1 = [self.an_current_x-self.ar_pose_array[1][1]+self.x2_dis, self.an_current_y-self.ar_pose_array[1][0]+self.y2_dis, self.an_current_z+target_high + self.z2_dis]
                    
                 self.AN_Vision_Mqtt.AN_Vision_ID = 0
                 self.dete_time = 0
@@ -201,8 +201,8 @@ class AN_Vision():
             if self.dete_time >= 10:
                 target_high = (self.min_high + self.max_high) / 2
                 
-                target_pose = [self.an_current_x+self.ar_pose_array[2][1]+self.x1_dis, self.an_current_y+self.ar_pose_array[2][0]+self.y1_dis, self.an_current_z+target_high + self.z1_dis]
-                target_pose1 = [self.an_current_x+self.ar_pose_array[2][1]+self.x2_dis, self.an_current_y+self.ar_pose_array[2][0]+self.y2_dis, self.an_current_z+target_high + self.z2_dis]
+                target_pose = [self.an_current_x-self.ar_pose_array[2][1]+self.x1_dis, self.an_current_y-self.ar_pose_array[2][0]+self.y1_dis, self.an_current_z+target_high + self.z1_dis]
+                target_pose1 = [self.an_current_x-self.ar_pose_array[2][1]+self.x2_dis, self.an_current_y-self.ar_pose_array[2][0]+self.y2_dis, self.an_current_z+target_high + self.z2_dis]
 
                 self.AN_Vision_Mqtt.AN_Vision_ID = 0
                 self.dete_time = 0
@@ -222,8 +222,8 @@ class AN_Vision():
                     self.an_target_pose1.publish(target_pose_data1)
         
         if self.vision_mode == 1 and self.ar_pose_array[6][2] != 0.0 and self.push_state == 1:
-            target_pose = [self.an_current_x+self.ar_pose_array[6][1]+self.x1_dis, self.an_current_y+self.ar_pose_array[6][0]+self.y1_dis, self.an_current_z+self.ar_pose_array[6][2]+self.z1_dis]
-            target_pose1 = [self.an_current_x+self.ar_pose_array[6][1]+self.x2_dis, self.an_current_y+self.ar_pose_array[6][0]+self.y2_dis, self.an_current_z+target_high + self.z2_dis]
+            target_pose = [self.an_current_x-self.ar_pose_array[6][1]+self.x1_dis, self.an_current_y-self.ar_pose_array[6][0]+self.y1_dis, self.an_current_z+self.ar_pose_array[6][2]+self.z1_dis]
+            target_pose1 = [self.an_current_x-self.ar_pose_array[6][1]+self.x2_dis, self.an_current_y-self.ar_pose_array[6][0]+self.y2_dis, self.an_current_z+target_high + self.z2_dis]
 
             self.an_vision_req_msg["action"] = self.AN_Vision_Mqtt.AN_Vision_Type
             self.an_vision_req_msg["target_pose"] = target_pose#[self.ar_pose_array[0][0], self.ar_pose_array[0][1], self.ar_pose_array[0][2]]

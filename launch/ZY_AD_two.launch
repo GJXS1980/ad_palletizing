@@ -1,11 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <launch>
-
-    <!--node pkg="palletizing" type="Palletizing_NODE" name="TD_Node">
-    </node-->
-
-    <include file="$(find usb_cam)/launch/ar_track_alvar_test.launch">
-    </include>
+	
+    <include file="$(find usb_cam)/launch/ar_track_alvar_test.launch" />
 
     <node pkg="ad_palletizing" type="client_ros.py" name="IMG_Node">
         <param name="host_ip" value="192.168.43.124" />
@@ -13,59 +9,56 @@
     </node>
     
     <node pkg="ad_palletizing" type="AN_Mission_two.py" name="Mission_Node">
+
         <param name="host_ip" value="192.168.43.124" />
         <param name="host_port" value="50002" />
 
+		<!--视觉识别模式, 1代表AGV上有码(识别放置,默认为6号码),0表示无码(盲放)-->
         <param name="vision_mode" value="0" />
 
+		<!-- 抓取集装箱1识别位置 -->
+		<param name="grasp_x1" value="120.91"/>   
+		<param name="grasp_y1" value="620.09"/>   
+		<param name="grasp_z1" value="0"/>
 
-	<param name="grasp_x1" value="120.91"/>   
-	<param name="grasp_y1" value="620.09"/>   
-	<param name="grasp_z1" value="0"/>
+		<!--放置集装箱1识别位置-->
+		<param name="push_x1" value="161.20"/>   <!--228.41/-->   <!-- 94.89/-->
+		<param name="push_y1" value="15.61"/>   <!-- -3.63/-->   <!-- -1.31/-->
+		<param name="push_z1" value="30"/>
 
+		<!--默认集装箱1放置位置-->
+		<param name="real_push_x1" value="161.20"/>
+		<param name="real_push_y1" value="15.61"/>
+		<param name="real_push_z1" value="275"/>
 
-	<param name="push_x1" value="80.58"/>   <!--228.41/-->   <!-- 94.89/-->
-	<param name="push_y1" value="1.3"/>   <!-- -3.63/-->   <!-- -1.31/-->
-	<param name="push_z1" value="30"/>
+		<!--抓取集装箱2识别位置-->
+		<param name="grasp_x2" value="269.01"/>   
+		<param name="grasp_y2" value="625.01"/>  
+		<param name="grasp_z2" value="10"/>
 
-
-	<param name="real_push_x1" value="80.58"/>
-	<param name="real_push_y1" value="1.3"/>
-	<param name="real_push_z1" value="275"/>
-
-
-	<param name="grasp_x2" value="269.01"/>   
-	<param name="grasp_y2" value="625.01"/>  
-	<param name="grasp_z2" value="10"/>
-
-
-	<param name="push_x2" value="243.09"/>    <!-- 384.79/-->    <!-- 257.41/-->
-	<param name="push_y2" value="1.29"/>     <!-- -10.39/-->    <!-- -1.31/-->
-	<param name="push_z2" value="30"/>
-
-
-	<param name="real_push_x2" value="243.09"/>
-	<param name="real_push_y2" value="1.29"/>
-	<param name="real_push_z2" value="275"/>
-
-
+		<!--放置集装箱2识别位置-->
+		<param name="push_x2" value="310.72"/>    <!-- 384.79/-->    <!-- 257.41/-->
+		<param name="push_y2" value="15.59"/>     <!-- -10.39/-->    <!-- -1.31/-->
+		<param name="push_z2" value="30"/>
+		<!--默认集装箱2放置位置-->
+		<param name="real_push_x2" value="310.72"/>
+		<param name="real_push_y2" value="15.59"/>
+		<param name="real_push_z2" value="275"/>
     </node>
     
     <node pkg="ad_palletizing" type="AN_Vision_two.py" name="Vision_Node">
         <param name="host_ip" value="192.168.43.124" />
         <param name="host_port" value="50002" />
-
+		<!--视觉识别模式, 1代表AGV上有码(识别放置,默认为6号码),0表示无码(盲放)-->
         <param name="vision_mode" value="0" />
-
-        <param name="x1_dis" value="10" />
-	<param name="y1_dis" value="0" />
-	<param name="z1_dis" value="0" />
-
-
-        <param name="x2_dis" value="18" />
-	<param name="y2_dis" value="35" />
-	<param name="z2_dis" value="0" />
-
+		<!--集装箱1视觉补偿-->
+        <param name="x1_dis" value="0" />
+		<param name="y1_dis" value="0" />
+		<param name="z1_dis" value="0" />
+		<!--集装箱2视觉补偿-->
+        <param name="x2_dis" value="0" />
+		<param name="y2_dis" value="0" />
+		<param name="z2_dis" value="0" />
     </node>
 
 </launch>
