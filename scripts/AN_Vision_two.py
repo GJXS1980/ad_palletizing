@@ -120,15 +120,17 @@ class AN_Vision():
     # AR码位姿,返回位姿（xyz,wxyz）的四舍五入值
     def get_ar_pose(self, msg):
         self.ar_pose_array.fill(0)
-        for i in range(len(msg.markers)):
-            self.ar_pose_array[msg.markers[i].id][0] = round(msg.markers[i].pose.pose.position.x*1000, 2)
-            self.ar_pose_array[msg.markers[i].id][1] = round(msg.markers[i].pose.pose.position.y*1000, 2)
-            self.ar_pose_array[msg.markers[i].id][2] = round(msg.markers[i].pose.pose.position.z*1000, 2)
+        # print(len(msg.markers))
+        if len(msg.markers) < 9:
+            for i in range(len(msg.markers)):
+                self.ar_pose_array[msg.markers[i].id][0] = round(msg.markers[i].pose.pose.position.x*1000, 2)
+                self.ar_pose_array[msg.markers[i].id][1] = round(msg.markers[i].pose.pose.position.y*1000, 2)
+                self.ar_pose_array[msg.markers[i].id][2] = round(msg.markers[i].pose.pose.position.z*1000, 2)
 
-            self.ar_pose_array[msg.markers[i].id][3] = msg.markers[i].pose.pose.orientation.w
-            self.ar_pose_array[msg.markers[i].id][4] = msg.markers[i].pose.pose.orientation.x
-            self.ar_pose_array[msg.markers[i].id][5] = msg.markers[i].pose.pose.orientation.y
-            self.ar_pose_array[msg.markers[i].id][6] = msg.markers[i].pose.pose.orientation.z
+                self.ar_pose_array[msg.markers[i].id][3] = msg.markers[i].pose.pose.orientation.w
+                self.ar_pose_array[msg.markers[i].id][4] = msg.markers[i].pose.pose.orientation.x
+                self.ar_pose_array[msg.markers[i].id][5] = msg.markers[i].pose.pose.orientation.y
+                self.ar_pose_array[msg.markers[i].id][6] = msg.markers[i].pose.pose.orientation.z
 
         if self.AN_Vision_Mqtt.AN_Vision_ID == 1 and self.ar_pose_array[0][2] != 0.0:
             #   识别船运动的最大和最小的幅度（z方向）
